@@ -691,12 +691,14 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL, t = c(seq(200
   } else {
     mselect(vm_emiTeMkt, all_enty = "co2")
   }
+
+  s33_CO2_chem_decomposition <- readGDX(gdx, "s33_CO2_chem_decomposition")
   out <- mbind(out,
                setNames(
                  # vm_emiTeMkt is variable in REMIND closest to energy co2 emissions
                  (dimSums(sel_vm_emiTeMkt_co2, dim = 3)
                   # subtract non-BECCS CCU CO2 (i.e., non-CCS part of DAC)
-                  - (1 - p_share_CCS) * (-v33_emi[,,"dac"])
+                  - (1 - p_share_CCS) * (-v33_emi[,,"dac"] - s33_CO2_chem_decomposition * v33_emi[,,"oae"])
                   # deduce co2 captured by industrial processes which is not stored but used for CCU
                   # -> gets accounted in industrial process emissions
                   - vm_emiIndCCS[, , "co2cement_process"]*(1-p_share_CCS)) * GtC_2_MtCO2,
@@ -731,8 +733,8 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL, t = c(seq(200
                  # land-use change CO2
                  setNames(dimSums(vm_emiMacSector[, , "co2luc"], dim = 3) * GtC_2_MtCO2,
                           "Emi|CO2|+|Land-Use Change (Mt CO2/yr)"),
-                 # negative emissions from (non-BECCS) CDR (DACCS, EW)
-                 setNames((v33_emi[,,"weathering"] + v33_emi[,,"dac"] * p_share_CCS) * GtC_2_MtCO2,
+                 # negative emissions from (non-BECCS) CDR (DACCS, EW, OAE)
+                 setNames((v33_emi[,,"weathering"] + v33_emi[,,"dac"] * p_share_CCS + v33_emi[,,"oae"]) * GtC_2_MtCO2,
                           "Emi|CO2|+|non-BECCS CDR (Mt CO2/yr)")
     )
 
@@ -757,8 +759,8 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL, t = c(seq(200
                  # land-use change CO2
                  setNames(dimSums(vm_emiMacSector[, , "co2luc"], dim = 3) * GtC_2_MtCO2,
                           "Emi|CO2|+|Land-Use Change (Mt CO2/yr)"),
-                 # negative emissions from (non-BECCS) CDR (DACCS, EW)
-                 setNames((v33_emi[,,"weathering"] + v33_emi[,,"dac"] * p_share_CCS) * GtC_2_MtCO2,
+                 # negative emissions from (non-BECCS) CDR (DACCS, EW, OAE)
+                 setNames((v33_emi[,,"weathering"] + v33_emi[,,"dac"] * p_share_CCS + v33_emi[,,"oae"]) * GtC_2_MtCO2,
                           "Emi|CO2|+|non-BECCS CDR (Mt CO2/yr)")
     )
 
@@ -943,6 +945,9 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL, t = c(seq(200
                # total co2 captured by DAC
                setNames(-v33_emi[,,"dac"] * GtC_2_MtCO2,
                           "Carbon Management|Carbon Capture|+|DAC (Mt CO2/yr)"),
+               # total co2 captured from calcination for OAE
+               setNames(- s33_CO2_chem_decomposition * v33_emi[,,"oae"] * GtC_2_MtCO2,
+                          "Carbon Management|Carbon Capture|+|OAE calcination (Mt CO2/yr)"),
                # total co2 captured
                setNames(vm_co2capture * GtC_2_MtCO2,
                           "Carbon Management|Carbon Capture (Mt CO2/yr)")
@@ -1369,7 +1374,10 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL, t = c(seq(200
                         "Emi|CO2|CDR|DACCS (Mt CO2/yr)"),
                # total EW
                setNames(v33_emi[,,"weathering"] * GtC_2_MtCO2,
-                        "Emi|CO2|CDR|EW (Mt CO2/yr)"))
+                        "Emi|CO2|CDR|EW (Mt CO2/yr)"),
+               # total OAE
+               setNames(v33_emi[,,"oae"] * GtC_2_MtCO2,
+                        "Emi|CO2|CDR|OAE (Mt CO2/yr)"))
 
   out <- mbind(out,
                # total CDR
@@ -1890,7 +1898,7 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL, t = c(seq(200
                  # CDR energy-related emissions
                  (dimSums(mselect(EmiFeCarrier[, , "ETS"], emi_sectors = "CDR"), dim = 3)
                   # Captured CO2 by non-BECCS capture technologies
-                  + (v33_emi[,,"weathering"] + v33_emi[,,"dac"] * p_share_CCS)) * GtC_2_MtCO2,
+                  + (v33_emi[,,"weathering"] + v33_emi[,,"dac"] * p_share_CCS + v33_emi[,,"oae"])) * GtC_2_MtCO2,
                  "Emi|GHG|ETS|+|non-BECCS CDR (Mt CO2eq/yr)"),
 
                # Extraction
