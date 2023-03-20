@@ -1898,6 +1898,8 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL, t = c(seq(200
                  # CDR energy-related emissions
                  (dimSums(mselect(EmiFeCarrier[, , "ETS"], emi_sectors = "CDR"), dim = 3)
                   # Captured CO2 by non-BECCS capture technologies
+                  # TODO: should I discount what is not stored geologically from the calcination?
+                  # i.e.: (1 - p_share_CCS) * s33_CO2_chem_decomposition * v33_emi[,,"oae"]
                   + (v33_emi[,,"weathering"] + v33_emi[,,"dac"] * p_share_CCS + v33_emi[,,"oae"])) * GtC_2_MtCO2,
                  "Emi|GHG|ETS|+|non-BECCS CDR (Mt CO2eq/yr)"),
 
