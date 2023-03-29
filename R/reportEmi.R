@@ -1385,6 +1385,7 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL, t = c(seq(200
                         + out[, , "Emi|CO2|CDR|BECCS (Mt CO2/yr)"]
                         + out[, , "Emi|CO2|CDR|DACCS (Mt CO2/yr)"]
                         + out[, , "Emi|CO2|CDR|EW (Mt CO2/yr)"]
+                        + out[, , "Emi|CO2|CDR|OAE (Mt CO2/yr)"]
                         + out[, , "Emi|CO2|CDR|Industry CCS|Synthetic Fuels (Mt CO2/yr)"],
                         "Emi|CO2|CDR (Mt CO2/yr)"))
 
@@ -2303,6 +2304,7 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL, t = c(seq(200
                      "Emi|CO2|CDR|Industry CCS|Synthetic Fuels (Mt CO2/yr)",
                      "Emi|CO2|CDR|DACCS (Mt CO2/yr)",
                      "Emi|CO2|CDR|EW (Mt CO2/yr)",
+                     "Emi|CO2|CDR|OAE (Mt CO2/yr)",
                      "Emi|CO2|CDR|Land-Use Change (Mt CO2/yr)")
 
 
